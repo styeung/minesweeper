@@ -1,22 +1,52 @@
 require 'set'
 
 class Minesweeper
+  attr_accessor :board
+
   def initialize(row_size, column_size, num_bombs)
     @board = Board.new(row_size, column_size, num_bombs)
   end
 
   def play
+    until self.over?
+      puts "Enter the row of the tile you want to click on: "
+      row = gets.chomp.to_i
+      puts "Enter the column of the tile you want to click on: "
+      column = gets.chomp.to_i
 
+      selected_tile = self.board[row][column]
+      selected_tile.reveal
+    end
+
+    self.print_result
   end
 
   def over?
-
-
+    if self.board.each do |row|
+      return true if row.any? {|tile| tile.value == "B" || tile.value == "b"}
+      return false if row.any? {|tile| tile.revealed == false}
+    end
   end
 
+  def win?
+    if self.over?
+      self.board.each do |row|
+        return false if row.any? {|tile| tile.value == "B" || tile.value == "b"}
+      end
+    end
+
+    return true
+  end
+
+  def print_result
+    if self.win?
+      "You win!"
+    else
+      "You lose!"
+    end
+  end
 
 end
-
 class Board
   attr_accessor :board
 
@@ -73,6 +103,7 @@ class Board
     self.board.each do |row|
       row.each do |tile|
         unless tile.revealed
+          tile.revealed = true
           if tile.bombed
             tile.value = "b"
           end
