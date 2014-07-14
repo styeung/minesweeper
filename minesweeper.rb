@@ -53,7 +53,7 @@ class Board
 end
 
 class Tile
-  attr_accessor :board, :row, :column :bombed, :flagged, :revealed
+  attr_accessor :board, :row, :column :bombed, :flagged, :revealed, :value
 
   def initialize(board, row, column, bombed_status = false)
     @board = board
