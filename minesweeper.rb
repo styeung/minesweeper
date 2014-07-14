@@ -9,13 +9,22 @@ class Minesweeper
 
   def play
     until self.over?
-      puts "Enter the row of the tile you want to click on: "
+      puts "What do you want to do? Enter 'r' for reveal or 'f' for flag. "
+      action = gets.chomp
+
+      puts "Enter the row of the tile you want to act on: "
       row = gets.chomp.to_i
-      puts "Enter the column of the tile you want to click on: "
+      puts "Enter the column of the tile you want to act on: "
       column = gets.chomp.to_i
 
       selected_tile = self.board[row][column]
-      selected_tile.reveal
+
+      if action == "r"
+        selected_tile.reveal
+      elsif action == "f"
+        selected_tile.place_flag
+      end
+
     end
 
     self.print_result
@@ -144,6 +153,10 @@ class Tile
         end
       end
     end
+  end
+
+  def place_flag
+
   end
 
   def neighbors
