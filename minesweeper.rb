@@ -50,6 +50,10 @@ class Board
 
   end
 
+  def reveal_all
+
+  end
+
 end
 
 class Tile
@@ -66,7 +70,20 @@ class Tile
   end
 
   def reveal
-
+    if self.bombed
+      self.board.reveal_all
+    else
+      self.revealed = true
+      surrounding_bombs = self.neighbor_bomb_count
+      if surrounding_bombs > 0
+        self.value = surrounding_bombs.to_s
+      else
+        self.value = "_"
+        self.neighbors.each do |tile|
+          tile.reveal
+        end
+      end
+    end
   end
 
   def neighbors
