@@ -1,7 +1,18 @@
 require 'set'
 
 class Minesweeper
+  def initialize(row_size, column_size, num_bombs)
+    @board = Board.new(row_size, column_size, num_bombs)
+  end
 
+  def play
+
+  end
+
+  def over?
+
+
+  end
 
 
 end
@@ -59,15 +70,15 @@ class Board
   end
 
   def reveal_all
-    self.board.each do |tile|
-      unless tile.revealed
-        if tile.bombed
-          tile.value = "b"
+    self.board.each do |row|
+      row.each do |tile|
+        unless tile.revealed
+          if tile.bombed
+            tile.value = "b"
+          end
         end
       end
     end
-
-    draw_board
   end
 
 end
