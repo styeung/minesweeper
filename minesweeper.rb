@@ -1,14 +1,17 @@
 require 'set'
+require 'debugger'
 
 class Minesweeper
-  attr_accessor :board
+  attr_accessor :board_object
 
   def initialize(row_size, column_size, num_bombs)
-    @board = Board.new(row_size, column_size, num_bombs)
+    @board_object = Board.new(row_size, column_size, num_bombs)
   end
 
   def play
+
     until self.over?
+      self.board_object.draw_board
       puts "What do you want to do? Enter 'r' for reveal or 'f' for flag. "
       action = gets.chomp
 
@@ -17,12 +20,18 @@ class Minesweeper
       puts "Enter the column of the tile you want to act on: "
       column = gets.chomp.to_i
 
-      selected_tile = self.board[row][column]
+      selected_tile = self.board_object.grid[row][column]
 
-      if action == "r"
-        selected_tile.reveal
-      elsif action == "f"
-        selected_tile.place_flag
+      if action != "r" && action != "f"
+        puts "Invalid action. Please try again"
+      elsif selected_tile.revealed
+        puts puts "This tile was already revealed or flagged. Please try again."
+      else
+        if action == "r"
+          selected_tile.reveal
+        elsif action == "f"
+          selected_tile.place_flag
+        end
       end
 
     end
@@ -31,7 +40,7 @@ class Minesweeper
   end
 
   def over?
-    if self.board.each do |row|
+    self.board_object.grid.each do |row|
       return true if row.any? {|tile| tile.value == "B" || tile.value == "b"}
       return false if row.any? {|tile| tile.revealed == false}
     end
@@ -39,7 +48,7 @@ class Minesweeper
 
   def win?
     if self.over?
-      self.board.each do |row|
+      self.board_object.grid.each do |row|
         return false if row.any? {|tile| tile.value == "B" || tile.value == "b"}
       end
     end
@@ -53,14 +62,16 @@ class Minesweeper
     else
       "You lose!"
     end
+    self.board_object.draw_board
   end
 
 end
+
 class Board
-  attr_accessor :board
+  attr_accessor :grid
 
   def initialize(row_size, column_size, num_bombs)
-    @board = self.create_with_random(row_size, column_size, num_bombs)
+    @grid = self.create_with_random(row_size, column_size, num_bombs)
 
   end
 
@@ -98,7 +109,7 @@ class Board
   end
 
   def draw_board
-    self.board.each do |row|
+    self.grid.each do |row|
       row.each do |column|
         print "#{column.value} "
       end
@@ -109,7 +120,7 @@ class Board
   end
 
   def reveal_all
-    self.board.each do |row|
+    self.grid.each do |row|
       row.each do |tile|
         unless tile.revealed
           tile.revealed = true
@@ -124,10 +135,10 @@ class Board
 end
 
 class Tile
-  attr_accessor :my_board, :row, :column, :bombed, :flagged, :revealed, :value
+  attr_accessor :board_object, :row, :column, :bombed, :flagged, :revealed, :value
 
-  def initialize(board_object, row, column, bombed_status = false)
-    @my_board = board_object.board
+  def initialize(my_board, row, column, bombed_status = false)
+    @board_object = my_board
     @row = row
     @column = column
     @bombed = bombed_status
@@ -137,33 +148,42 @@ class Tile
   end
 
   def reveal
-    if self.bombed
-      self.revealed = true
-      self.value = "B"
-      self.board.reveal_all
-    else
-      self.revealed = true
-      surrounding_bombs = self.neighbor_bomb_count
-      if surrounding_bombs > 0
-        self.value = surrounding_bombs.to_s
+    unless self.revealed
+      if self.bombed
+        self.revealed = true
+        self.value = "B"
+        self.board_object.reveal_all
       else
-        self.value = "_"
-        self.neighbors.each do |tile|
-          tile.reveal
+        self.revealed = true
+        surrounding_bombs = self.neighbor_bomb_count
+        if surrounding_bombs > 0
+          self.value = surrounding_bombs.to_s
+        else
+          self.value = "_"
+          self.neighbors.each do |tile|
+            tile.reveal
+          end
         end
       end
     end
   end
 
   def place_flag
+    unless self.revealed
+      self.revealed = true
+      self.value = "F"
+    end
 
   end
 
   def neighbors
     neighbor_array = []
-    self.board.each do |tile|
-      if self.is_neighbor?(tile)
-        neighbor_array << tile
+
+    self.board_object.grid.each do |row|
+      row.each do |tile|
+        if self.is_neighbor?(tile)
+          neighbor_array << tile
+        end
       end
     end
 
@@ -173,7 +193,7 @@ class Tile
 
   def is_neighbor?(tile2)
     deltas = [
-      [1,1], [-1, 1], [1, -1], [-1, -1]
+      [1,1], [-1, 1], [1, -1], [-1, -1], [1,0], [-1,0], [0, -1], [0,1]
     ]
 
     deltas.each do |x|
@@ -196,4 +216,5 @@ class Tile
 
     bomb_count
   end
+
 end
