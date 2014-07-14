@@ -18,7 +18,10 @@ class Minesweeper
       action = gets.chomp
 
       if action == 's'
-        self.save
+        puts "Enter in a name for your save file: "
+        file_name = gets.chomp
+        file_name.gsub!(" ", "_")
+        self.save(file_name)
         next
       end
 
@@ -59,9 +62,9 @@ class Minesweeper
     self.board.draw_board
   end
 
-  def save
+  def save(file_name)
     content = self.board.to_yaml
-    File.open("minesweeper_file.yml", "w") do |f|
+    File.open("#{file_name}.yml", "w") do |f|
       f.puts content
     end
   end
