@@ -78,6 +78,7 @@ class Tile
     end
 
     neighbor_array
+
   end
 
   def is_neighbor?(tile2)
