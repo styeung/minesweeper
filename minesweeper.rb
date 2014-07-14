@@ -9,7 +9,13 @@ end
 class Board
   attr_accessor :board
 
-  def self.create_with_random(row_size, column_size, num_bombs)
+  def initialize(row_size, column_size, num_bombs)
+    @board = self.create_with_random(row_size, column_size, num_bombs)
+
+  end
+
+  #factory method to randomly place bombs on a grid
+  def create_with_random(row_size, column_size, num_bombs)
     overall_board = Array.new(row_size) { Array.new(column_size)}
 
     i = 0
@@ -25,8 +31,8 @@ class Board
 
     end
 
-    (0...row).each do |row|
-      (0...column).each do |column|
+    (0...row_size).each do |row|
+      (0...column_size).each do |column|
         if bomb_places.include?([row, column])
           new_tile = Tile.new(self, row, column, true)
           overall_board[row][column] = new_tile
@@ -41,26 +47,36 @@ class Board
 
   end
 
-  def initialize(row_size, column_size, num_bombs)
-    @board = self.create_with_random(row_size, column_size, num_bombs)
-
-  end
-
   def draw_board
+    self.board.each do |row|
+      row.each do |column|
+        print "#{column.value} "
+      end
+      puts
+    end
 
+    nil
   end
 
   def reveal_all
+    self.board.each do |tile|
+      unless tile.revealed
+        if tile.bombed
+          tile.value = "b"
+        end
+      end
+    end
 
+    draw_board
   end
 
 end
 
 class Tile
-  attr_accessor :board, :row, :column :bombed, :flagged, :revealed, :value
+  attr_accessor :my_board, :row, :column, :bombed, :flagged, :revealed, :value
 
-  def initialize(board, row, column, bombed_status = false)
-    @board = board
+  def initialize(board_object, row, column, bombed_status = false)
+    @my_board = board_object.board
     @row = row
     @column = column
     @bombed = bombed_status
@@ -71,6 +87,8 @@ class Tile
 
   def reveal
     if self.bombed
+      self.revealed = true
+      self.value = "B"
       self.board.reveal_all
     else
       self.revealed = true
