@@ -46,10 +46,14 @@ class Board
 
   end
 
+  def draw_board
+
+  end
+
 end
 
 class Tile
-  attr_accessor :row, :column :bombed, :flagged, :revealed
+  attr_accessor :board, :row, :column :bombed, :flagged, :revealed
 
   def initialize(board, row, column, bombed_status = false)
     @board = board
@@ -66,10 +70,39 @@ class Tile
   end
 
   def neighbors
+    neighbor_array = []
+    self.board.each do |tile|
+      if self.is_neighbor?(tile)
+        neighbor_array << tile
+      end
+    end
 
+    neighbor_array
+  end
+
+  def is_neighbor?(tile2)
+    deltas = [
+      [1,1], [-1, 1], [1, -1], [-1, -1]
+    ]
+
+    deltas.each do |x|
+      if [tile2.row, tile2.column] == [self.row + x[0], self.column + x[1]]
+        return true
+      end
+    end
+
+    return false
   end
 
   def neighbor_bomb_count
+    bomb_count = 0
 
+    self.neighbors.each do |x|
+      if x.bombed
+        bomb_count += 1
+      end
+    end
+
+    bomb_count
   end
 end
