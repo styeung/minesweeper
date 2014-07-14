@@ -1,19 +1,26 @@
 require 'set'
 require 'debugger'
+require 'yaml'
 
 class Minesweeper
   attr_accessor :board
 
-  def initialize(row_size, column_size, num_bombs)
-    @board = Board.new(row_size, column_size, num_bombs)
+  def initialize(board)
+    @board = board
   end
 
   def play
 
     until self.board.over?
       self.board.draw_board
-      puts "What do you want to do? Enter 'r' for reveal or 'f' for flag. "
+      puts "What do you want to do? Enter 'r' for reveal or 'f' for flag."
+      puts "Or enter 's' if you want to save the game state."
       action = gets.chomp
+
+      if action == 's'
+        self.save
+        next
+      end
 
       puts "Enter the row of the tile you want to act on: "
       row = gets.chomp.to_i
@@ -48,8 +55,15 @@ class Minesweeper
     else
       puts "You lose!"
     end
-    self.board.draw_board
 
+    self.board.draw_board
+  end
+
+  def save
+    content = self.board.to_yaml
+    File.open("minesweeper_file.yml", "w") do |f|
+      f.puts content
+    end
   end
 
 end
@@ -226,3 +240,24 @@ class Tile
   end
 
 end
+
+if __FILE__ == $PROGRAM_NAME
+  if ARGV.empty?
+    puts "How many rows do you want your game to have?"
+    game_rows = gets.chomp.to_i
+    puts "How many columns do you want your game to have?"
+    game_columns = gets.chomp.to_i
+    puts "How many bombs do you want your game to have?"
+    game_bombs = gets.chomp.to_i
+
+    game_board = Board.new(game_rows, game_columns, game_bombs)
+    game = Minesweeper.new(game_board)
+    game.play
+  else
+    content = File.read(ARGV.shift)
+    game_board = YAML.load(content)
+    game = Minesweeper.new(game_board)
+    game.play
+  end
+end
+
